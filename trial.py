@@ -6,7 +6,7 @@ from tmp import *
 import json
 
 def main():
-    text = "/home/sdecu/repo/bookToAnki/books/compteDeMonteCristo.txt"
+    text = "/home/sdecu/repo/bookToAnki/books/test.txt"
     book = get_text(text)
     nlp = fr_dep_news_trf.load()
     doc = nlp(book)
@@ -27,17 +27,15 @@ def main():
     #print(wc)
 
     
-    wc = remove_known_words(words_known, wc)
+    temp = remove_known_words(words_known, wc)
+    f = open("../temp2.txt", "w")
+    f.write(str(temp))
+    f.close()
 
     sentences = extract_sentences(wc, doc, nlp)
-    """
 
     with open("./sentences.json", "w", encoding="utf-8") as f:
         json.dump(sentences, f, ensure_ascii=False, indent=2)
-    """
-    f = open("./monte.txt", "w")
-    f.write(str(sentences))
-    f.close()
     #for token in doc:
     #    print(token.text)
 
@@ -80,6 +78,8 @@ def extract_sentences(dictionary, doc, nlp):
     result = {}
     for word in dictionary:
         for sent in doc.sents:
+            if len(sent) > 12:
+                continue
             if word in [token.lemma_.lower() for token in nlp(sent.text)]:
                 result[word] = sent.text.strip()
                 break

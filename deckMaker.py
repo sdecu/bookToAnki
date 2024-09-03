@@ -33,7 +33,7 @@ my_note = genanki.Note(
 
 my_deck = genanki.Deck(
   2059400110,
-  'fr1k test')
+  'montecristo')
 
 for item in note_list:
     my_deck.add_note(item)
