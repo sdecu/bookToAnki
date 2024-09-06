@@ -19,7 +19,7 @@ my_model = genanki.Model(
 note_list = []
 words = None
 
-with open('./dict.json') as f:
+with open('./dict5k.json') as f:
     words = json.load(f)
 
 i = 1

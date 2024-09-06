@@ -6,7 +6,7 @@ from tmp import *
 import json
 
 def main():
-    text = "/home/sdecu/repo/bookToAnki/books/compteDeMonteCristo.txt"
+    text = "/home/sdecu/repo/bookToAnki/books/stranger.txt"
     book = get_text(text)
     nlp = fr_dep_news_trf.load()
     doc = nlp(book)
@@ -30,14 +30,10 @@ def main():
     wc = remove_known_words(words_known, wc)
 
     sentences = extract_sentences(wc, doc, nlp)
-    """
 
     with open("./sentences.json", "w", encoding="utf-8") as f:
         json.dump(sentences, f, ensure_ascii=False, indent=2)
-    """
-    f = open("./monte.txt", "w")
-    f.write(str(sentences))
-    f.close()
+
     #for token in doc:
     #    print(token.text)
 
@@ -63,7 +59,7 @@ def sort_dict(words):
 
 
 def remove_uncommon_words(words):
-    return {key: value for key, value in words.items() if value >= 5}
+    return {key: value for key, value in words.items() if value >= 4}
 
 def remove_known_words(known, common):
     temp = common.copy()
@@ -77,6 +73,7 @@ def store_common_words(dictionary):
     f.close()
 
 def extract_sentences(dictionary, doc, nlp):
+    i = len(dictionary.keys())
     result = {}
     for word in dictionary:
         for sent in doc.sents:
@@ -85,6 +82,8 @@ def extract_sentences(dictionary, doc, nlp):
                 break
         if word not in result:
             result[word] = f"No sentence found for '[word]'"
+        i = i -1
+        print(i)
     return result
 
     

@@ -1,5 +1,5 @@
 def main():
-    text = "/home/sdecu/repo/anki/books/compteDeMonteCristo.txt"
+    text = "/home/sdecu/repo/bookToAnki/books/stranger.txt"
     book = get_text(text)
     get_word_count(book) 
     get_char_count(book) 
