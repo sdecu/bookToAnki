@@ -17,23 +17,36 @@ my_model = genanki.Model(
   ])
 
 note_list = []
-words = None
+fr = None
+en = None
 
-with open('./dict5k.json') as f:
-    words = json.load(f)
+with open('./sentences.json') as f:
+    fr = json.load(f)
 
-i = 1
-for i in range(1, len(words) + 1):
-    note_list.append(genanki.Note(model=my_model, fields=[words[str(i)], words[str(i)]]))
+with open('./senteng.json') as f:
+    en = json.load(f)
 
+fr_keys = list(fr.keys())
+en_keys = list(en.keys())
+
+for i in range(len(fr)):
+    note_list.append(genanki.Note(
+        model=my_model,
+        fields=[
+        f"{fr_keys[i]}: {fr[fr_keys[i]]}",
+        f"{en_keys[i]}: {en[en_keys[i]]}"
+    ]
+    ))
+
+"""
 my_note = genanki.Note(
   model=my_model,
   fields=['Capital of Argentina', 'Buenos Aires'])
-
+"""
 
 my_deck = genanki.Deck(
   2059400110,
-  'montecristo')
+  "le'tranger")
 
 for item in note_list:
     my_deck.add_note(item)
