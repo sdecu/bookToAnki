@@ -1,4 +1,5 @@
 import spacy
+from google.cloud import translate_v2
 import fr_dep_news_trf
 import make
 import deckMaker
