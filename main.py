@@ -1,9 +1,8 @@
 import spacy
-from google.cloud import translate_v2
 import fr_dep_news_trf
 import make
-import deckMaker
 from tmp import *
+import string
 import json
 
 def main():
@@ -24,6 +23,7 @@ def main():
     wc = word_count(processed)
     store_common_words(wc)
     wc = remove_uncommon_words(common_words)
+    wc = remove_punctuation(wc)
     wc = sort_dict(wc)
     #print(wc)
 
@@ -32,7 +32,7 @@ def main():
 
     sentences = extract_sentences(wc, doc, nlp)
 
-    with open("./sentences.json", "w", encoding="utf-8") as f:
+    with open("./fr.json", "w", encoding="utf-8") as f:
         json.dump(sentences, f, ensure_ascii=False, indent=2)
 
     #for token in doc:
@@ -60,7 +60,10 @@ def sort_dict(words):
 
 
 def remove_uncommon_words(words):
-    return {key: value for key, value in words.items() if value >= 4}
+    return {key: value for key, value in words.items() if value >= 3}
+
+def remove_punctuation(words):
+    return {key: value for key, value in words.items() if key not in string.punctuation}
 
 def remove_known_words(known, common):
     temp = common.copy()
