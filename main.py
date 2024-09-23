@@ -1,13 +1,11 @@
 import spacy
 import fr_dep_news_trf
-import make
 from tmp import *
 import string
 import json
 
 def main():
-    text = "/home/sdecu/repo/bookToAnki/books/stranger.txt"
-    book = get_text(text)
+    book = get_text(input("where is you're file located?"))
     nlp = fr_dep_news_trf.load()
     doc = nlp(book)
 

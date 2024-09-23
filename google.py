@@ -1,4 +1,4 @@
-def translate_text(target: str, text: str):
+def translate_text(target: str, text: str) :
     """Translates text into the target language.
 
     Target must be an ISO 639-1 language code.
