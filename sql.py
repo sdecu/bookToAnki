@@ -15,8 +15,6 @@ def main():
 
             cursor = cnt.cursor()
             
-            cursor.execute('ATTACH DATABASE test.db AS new_db;')
-            cursor.execute('INSERT INTO new_db.common_words_fr SELECT * FROM common.db.common_words_fr;')
 
             """
             for word, sent in dict.items():
@@ -29,17 +27,23 @@ def main():
     except sqlite3.Error as error:
         print('Error occured - ', error)
 
-def query(db, cols, vals):
+
+        #rewrite query function 
+def read_book_words(freq, book_name):
     try:
-        with sqlite3.connect(db) as cnt:
+        with sqlite3.connect('common.db') as cnt:
             cursor = cnt.cursor()
 
-            cursor.execute(f'INSERT INTO {db}({cols}) VALUES ({vals})')
-            
+            cursor.execute('SELECT word FROM book_words WHERE count > ? and book = ?', (freq, book_name))
+            results = cursor.fetchall()
+            words = [row[0] for row in results]
+
+            return words
 
 
     except sqlite3.Error as error:
         print('Error occured - ', error)
+        return []
 
 def read_common_words_fr():
     try:
@@ -55,44 +59,43 @@ def read_common_words_fr():
         print('Error occured - ', error)
     
 
-def create_book_db(bookname, dictionary):
+def add_book(bookname, dictionary):
     try:
         with sqlite3.connect('common.db') as cnt:
             print('db init')
             
-            cnt.execute('DROP TABLE IF EXISTS ?', (bookname))
 
-            cnt.execute('''CREATE TABLE IF NOT EXISTS  ?
-            (word TEXT PRIMARY KEY,
+            cnt.execute('''INSERT INTO book_words
+            (book text
+            word TEXT PRIMARY KEY,
             count INT)''', (bookname))
             cursor = cnt.cursor()
             
 
-            for word, sent in dictionary.items():
-                cursor.execute('INSERT INTO ? (WORD, SENTENCE) VALUES (?, ?)',
-                                (bookname, word, sent))
+            for word, count in dictionary.items():
+                cursor.execute('INSERT INTO book_words (book, word, count) VALUES (?, ?, ?)',
+                                (bookname, word, count))
             cursor.close()
             print('success')
 
     except sqlite3.Error as error:
         print('Error occured - ', error)
     
-def add_book_words_to_known_words(book_table, freq):
+def add_book_words_to_known_words(freq, book_name):
     try:
         with sqlite3.connect('common.db') as cnt:
             print('db init')
             
-            cnt.execute('''CREATE TABLE IF NOT EXISTS  ?
-            (WORD TEXT PRIMARY KEY)''', "known_words")
+            cnt.execute('''CREATE TABLE IF NOT EXISTS  known_words
+            (WORD TEXT PRIMARY KEY)''')
 
             cursor = cnt.cursor()
-            words = cursor.execute('SELECT word FROM ? WHERE count > ?', (book_table, freq)) 
+            cursor.execute('SELECT word FROM book_words WHERE count > ? AND book = ?', (freq, book_name)) 
+            words = cursor.fetchall()
 
-            for word in cursor.fetchall():
-                cursor.execute('INSERT INTO known_words (word) VALUES (?)',
-                                (word))
-            cursor.close()
-            print('success')
+
+            cursor.executemany('INSERT OR IGNORE INTO known_words (word) VALUES (?)', (words))
+            print(f'Successfully added {cursor.rowcount} words to known_words')
 
     except sqlite3.Error as error:
         print('Error occured - ', error)
