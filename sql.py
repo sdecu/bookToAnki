@@ -2,49 +2,6 @@ import sqlite3
 import json
 from deckMaker import translate_text 
 
-def main():
-    try:
-        with sqlite3.connect('common.db') as cnt:
-            print('db init')
-        
-            cnt.execute('''CREATE TABLE IF NOT EXISTS common_words_fr
-            (WORD TEXT PRIMARY KEY,
-            SENTENCE TEXT,
-            TRANSWORD TEXT,
-            TRANSSENTENCE TEXT)''')
-
-            cursor = cnt.cursor()
-            
-
-            """
-            for word, sent in dict.items():
-                cursor.execute('INSERT INTO common_words_fr (WORD, SENTENCE, TRANSWORD, TRANSSENTENCE) VALUES (?, ?, ?, ?)',
-                                (word, sent, translate_text('en', word), translate_text('en', sent)))
-            """
-            cnt.commit()
-            print('success')
-
-    except sqlite3.Error as error:
-        print('Error occured - ', error)
-
-
-        #rewrite query function 
-def read_book_words(freq, book_name):
-    try:
-        with sqlite3.connect('common.db') as cnt:
-            cursor = cnt.cursor()
-
-            cursor.execute('SELECT word FROM book_words WHERE count > ? and book = ?', (freq, book_name))
-            results = cursor.fetchall()
-            words = [row[0] for row in results]
-
-            return words
-
-
-    except sqlite3.Error as error:
-        print('Error occured - ', error)
-        return []
-
 def read_common_words_fr():
     try:
         with sqlite3.connect('common.db') as cnt:
@@ -56,8 +13,23 @@ def read_common_words_fr():
             return words
 
     except sqlite3.Error as error:
-        print('Error occured - ', error)
+        print('Failed to read 1000 most common words- ', error)
     
+def read_book_words(freq, book_name):
+    try:
+        with sqlite3.connect('common.db') as cnt:
+            cursor = cnt.cursor()
+
+            cursor.execute('SELECT word FROM book_words WHERE count > ? and book = ?', (int(freq), book_name))
+            results = cursor.fetchall()
+            words = [row[0] for row in results]
+
+            return words
+
+
+    except sqlite3.Error as error:
+        print(f'Failed to read {book_name} words from database- ', error)
+        return []
 
 def add_book(bookname, dictionary):
     try:
@@ -73,24 +45,24 @@ def add_book(bookname, dictionary):
             
 
             for word, count in dictionary.items():
-                cursor.execute('INSERT INTO book_words (book, word, count) VALUES (?, ?, ?)',
+                cursor.execute('INSERT or ignore INTO book_words (book, word, count) VALUES (?, ?, ?)',
                                 (bookname, word, count))
             cursor.close()
             print('success')
 
     except sqlite3.Error as error:
-        print('Error occured - ', error)
+        print(f'Failed to add {bookname}to database - ', error)
     
-def add_book_words_to_known_words(freq, book_name):
+def write_book_words_to_known_words(freq, book_name):
     try:
         with sqlite3.connect('common.db') as cnt:
             print('db init')
             
             cnt.execute('''CREATE TABLE IF NOT EXISTS  known_words
-            (WORD TEXT PRIMARY KEY)''')
+            (word TEXT PRIMARY KEY)''')
 
             cursor = cnt.cursor()
-            cursor.execute('SELECT word FROM book_words WHERE count > ? AND book = ?', (freq, book_name)) 
+            cursor.execute('SELECT word FROM book_words WHERE count > ? AND book = ?', (int(freq), book_name)) 
             words = cursor.fetchall()
 
 
@@ -98,7 +70,24 @@ def add_book_words_to_known_words(freq, book_name):
             print(f'Successfully added {cursor.rowcount} words to known_words')
 
     except sqlite3.Error as error:
-        print('Error occured - ', error)
-    
-if __name__ == "__main__":
-    main()
+        print(f'Failed to add words to known words from {book_name} - ', error)
+
+def read_known_words():
+    try:
+        with sqlite3.connect('common.db') as cnt:
+            print('db init')
+            
+            cnt.execute('''CREATE TABLE IF NOT EXISTS  known_words
+            (word TEXT PRIMARY KEY)''')
+
+            cursor = cnt.cursor()
+            cursor.execute('SELECT word FROM known_words',) 
+            results = cursor.fetchall()
+            words = [row[0] for row in results]
+
+            return words
+
+
+    except sqlite3.Error as error:
+        print('Failed to read known words- ', error)
+        return []
