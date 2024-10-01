@@ -1,38 +1,33 @@
 import spacy
 import fr_dep_news_trf
-from tmp import *
+from sql import *
 import string
-import json
 
 def main():
-    book = get_text(input("where is you're file located?"))
+    book = get_text("./books/test.txt")
     nlp = fr_dep_news_trf.load()
     doc = nlp(book)
 
-    words_known = None
-
-    with open("./dict5k.json") as f:
-        words_known = json.load(f)
-    
+    known_words = read_known_words()
 
     processed = ""
     for token in doc:
         processed = processed + token.lemma_ + " "
     wc = word_count(processed)
-    store_common_words(wc)
-    wc = remove_uncommon_words(common_words)
     wc = remove_punctuation(wc)
-    wc = sort_dict(wc)
+    add_book("test", wc)
+    
+    print(read_words_for_anki_deck(5, "test"))
     #print(wc)
 
     
-    wc = remove_known_words(words_known, wc)
 
-    sentences = extract_sentences(wc, doc, nlp)
-
+    sentences = extract_sentences(read_words_for_anki_deck(5, "test"), doc, nlp)
+    print(sentences)
+    """
     with open("./fr.json", "w", encoding="utf-8") as f:
         json.dump(sentences, f, ensure_ascii=False, indent=2)
-
+    """
     #for token in doc:
     #    print(token.text)
 
@@ -75,7 +70,7 @@ def store_common_words(dictionary):
     f.close()
 
 def extract_sentences(dictionary, doc, nlp):
-    i = len(dictionary.keys())
+    i = len(dictionary)
     result = {}
     for word in dictionary:
         for sent in doc.sents:

@@ -77,3 +77,6 @@ for item in note_list:
     my_deck.add_note(item)
 
 genanki.Package(my_deck).write_to_file('output.apkg')
+
+if __name__ == "__main__":
+    print("")
