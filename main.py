@@ -17,20 +17,13 @@ def main():
     wc = remove_punctuation(wc)
     add_book("test", wc)
     
-    print(read_words_for_anki_deck(5, "test"))
-    #print(wc)
+    anki_words = read_words_for_anki_deck(5, 'test', 'fr')
+    print(anki_words)
 
-    
-
-    sentences = extract_sentences(read_words_for_anki_deck(5, "test"), doc, nlp)
+    sentences = extract_sentences(anki_words, doc, nlp)
     print(sentences)
-    """
-    with open("./fr.json", "w", encoding="utf-8") as f:
-        json.dump(sentences, f, ensure_ascii=False, indent=2)
-    """
-    #for token in doc:
-    #    print(token.text)
-
+    
+    write_book_words_to_known_words(5, "test")
 
 def get_text(text):
     with open(text) as f:

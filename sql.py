@@ -1,12 +1,12 @@
 import sqlite3
-import json
 
-def read_common_words_fr():
+def read_common_words(language):
     try:
         with sqlite3.connect('common.db') as cnt:
             cursor = cnt.cursor()
 
-            cursor.execute('SELECT ngram FROM common_words_fr LIMIT 1000')
+            cursor.execute('SELECT ngram FROM common_words WHERE language = ? LIMIT 1000', (language))
+            
             words = cursor.fetchall()
             cursor.close()
             return words
@@ -91,7 +91,7 @@ def read_known_words():
         print('Failed to read known words- ', error)
         return []
 
-def read_words_for_anki_deck(freq, book_name):
+def read_words_for_anki_deck(freq, book_name, language):
     try:
         with sqlite3.connect('common.db') as cnt:
             cursor = cnt.cursor()
@@ -100,9 +100,9 @@ def read_words_for_anki_deck(freq, book_name):
             FROM book_words
             WHERE book = ?
             AND count > ?
-            AND word NOT IN (SELECT ngram FROM common_words_fr LIMIT 1000)
+            AND word NOT IN (SELECT ngram FROM common_words WHERE language = ? LIMIT 1000)
             AND word NOT IN (SELECT word FROM known_words);
-            ''', (book_name, int(freq)))
+            ''', (book_name, int(freq), language))
             results = cursor.fetchall()
             words = [row[0] for row in results]
 
