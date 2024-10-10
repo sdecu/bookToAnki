@@ -2,28 +2,34 @@ import spacy
 import fr_dep_news_trf
 from sql import *
 import string
+import typer
+from typing_extensions import Annotated
+import os
 
-def main():
-    book = get_text("./books/test.txt")
+def cli(count: Annotated[int, typer.Argument(help="if word appears more often than <number> it will be added to anki deck")],
+        file: Annotated[str, typer.Argument(help="absolute or relative path to book")],
+        language: Annotated[str, typer.Argument(help="language that the book is in, target must be an ISO 639-1 language code ")]):
+    
+    book_name = sanitize_bookname(file)
+    book = get_text(file)
     nlp = fr_dep_news_trf.load()
     doc = nlp(book)
 
-    known_words = read_known_words()
-
+    
     processed = ""
     for token in doc:
         processed = processed + token.lemma_ + " "
     wc = word_count(processed)
     wc = remove_punctuation(wc)
-    add_book("test", wc)
+    add_book(book_name, wc)
     
-    anki_words = read_words_for_anki_deck(5, 'test', 'fr')
-    print(anki_words)
+    anki_words = read_words_for_anki_deck(count, book_name, language)
+    click.echo(anki_words)
 
-    sentences = extract_sentences(anki_words, doc, nlp)
-    print(sentences)
+    #sentences = extract_sentences(anki_words, doc, nlp)
+    #click.echo(sentences)
     
-    write_book_words_to_known_words(5, "test")
+    write_book_words_to_known_words(count, book_name, language)
 
 def get_text(text):
     with open(text) as f:
@@ -73,9 +79,13 @@ def extract_sentences(dictionary, doc, nlp):
         if word not in result:
             result[word] = f"No sentence found for '[word]'"
         i = i -1
-        print(i)
+        click.echo(i)
     return result
 
+def sanitize_bookname(filepath):
+    pos1 = [pos for pos, char in enumerate(filepath) if char == '/']
+    pos2 = [pos for pos, char in enumerate(filepath) if char == '.']
+    return f'book_{filepath[pos1[-1]+1:pos2[-1]]}'
     
-
-main()
+if __name__ == '__main__':
+    typer.run(cli)
