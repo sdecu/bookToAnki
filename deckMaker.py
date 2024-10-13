@@ -1,5 +1,6 @@
 import genanki
 import json
+import click
 
 def translate_text(target: str, text: str):
     """Translates text into the target language.
@@ -18,9 +19,9 @@ def translate_text(target: str, text: str):
     # will return a sequence of results for each text.
     result = translate_client.translate(text, target_language=target)
     """
-    print("Text: {}".format(result["input"]))
-    print("Translation: {}".format(result["translatedText"]))
-    print("Detected source language: {}".format(result["detectedSourceLanguage"]))
+    click.echo("Text: {}".format(result["input"]))
+    click.echo("Translation: {}".format(result["translatedText"]))
+    click.echo("Detected source language: {}".format(result["detectedSourceLanguage"]))
     """
     return result["translatedText"]
 
@@ -53,8 +54,8 @@ fr_keys = list(fr.keys())
 en_keys = list(en.keys())
 
 for i in range(len(fr)):
-    print(len(fr))
-    print(i)
+    click.echo(len(fr))
+    click.echo(i)
     note_list.append(genanki.Note(
         model=my_model,
         fields=[
@@ -79,4 +80,4 @@ for item in note_list:
 genanki.Package(my_deck).write_to_file('output.apkg')
 
 if __name__ == "__main__":
-    print("")
+    click.echo("")
