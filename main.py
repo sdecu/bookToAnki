@@ -1,8 +1,10 @@
 import spacy
 import fr_dep_news_trf
 from sql import *
+from deckMaker import *
 import string
 import typer
+from rich.progress import track
 from typing_extensions import Annotated
 import os
 
@@ -24,12 +26,13 @@ def cli(count: Annotated[int, typer.Argument(help="if word appears more often th
     add_book(book_name, wc)
     
     anki_words = read_words_for_anki_deck(count, book_name, language)
-    click.echo(anki_words)
 
-    #sentences = extract_sentences(anki_words, doc, nlp)
-    #click.echo(sentences)
+    sentences = extract_sentences(anki_words, doc, nlp)
+
+    make_deck(book_name, sentences)
     
     write_book_words_to_known_words(count, book_name, language)
+    
 
 def get_text(text):
     with open(text) as f:
@@ -69,17 +72,14 @@ def store_common_words(dictionary):
     f.close()
 
 def extract_sentences(dictionary, doc, nlp):
-    i = len(dictionary)
     result = {}
-    for word in dictionary:
+    for word in track(dictionary, description="finding sentences..."):
         for sent in doc.sents:
             if word in [token.lemma_.lower() for token in nlp(sent.text)]:
                 result[word] = sent.text.strip()
                 break
         if word not in result:
             result[word] = f"No sentence found for '[word]'"
-        i = i -1
-        click.echo(i)
     return result
 
 def sanitize_bookname(filepath):
